@@ -51,6 +51,7 @@ Week#: 51/52<br>
 - Went through all the files to try and trace back the issue. Turns out fabric was setting in the `http` on it's own. 
 - I could either append `https` at the start of relative urls or hardcode the initial url. 
 - Choosing the later was a better option and went for it(Ab adviced).
+
 ------
 
 
