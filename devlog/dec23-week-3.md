@@ -52,6 +52,26 @@ Week#: 51/52<br>
 - I could either append `https` at the start of relative urls or hardcode the initial url. 
 - Choosing the later was a better option and went for it(Ab adviced).
 
-------
+
+## Friday
+
+- Started the day with the aim to figure out the reason behind the mysql container data not being persistent.
+- Tried to narrow down where the issue was starting exactly.
+- I thought because I didn't use the `ecstop` command this was happening, this wasn't the case.
+- Then I tried multiple combinations of stopping, starting, restarting the containers and restarting the docker daemon. 
+- Figured out the docker daemon restart was causing the issue.
+- Now, I was using a pre-installed ubuntu i.e I've been using it for 2 years so naturally it had some extra services running. Decided do perform a fresh installation.
+- Did a fresh installation of Ubuntu and created two user - this took 3 hours which included downling, backing up the data and preparing the laptop as well as the installation.
+- Went up with the full setup and the issue was still there.
+- Then went to proper googling and stack overflow. Found some questions and answer that had the same case but their solutions didn't work for my system. I thought this was system specific. 
+- Tried using an external storage i.e using something in my home directory. It worked. The data was persistant meaning there was something with the directory itself.
+- Went through inspection of containers and found the volumes were being mounted no problem there.
+- Tried to navigate to the path specified in the mounts. Path not found error.
+- I think maybe docker was trying to find that folder in the host machine to store the sql data, and the folder not being there was causing the issue. Created folder `data/myql` and Voila! it worked.
+- Will need to commit the `data/mysql` folder as empty. It is needed for every new repo pull.
+- Tried changing the .gitignore for this, tried various combinations of `data/*` and `!data/mysql/`.
+- None seemed to work. The problem is git doesn't recognise a empty folder as modification as such. Tried a workaround. Added an emtpy `data/empty` folder with .gitkeep as the sole file. Then pushed and added `data` to .gitignore. Worked!
+- Now anyone who clones the repo will have a empty `data/mysql` folder with just one .gitkeep file.
+- Added comments in the file to make sure the purpose is clear and isn't modified.
 
 
