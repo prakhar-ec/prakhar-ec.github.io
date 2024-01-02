@@ -61,7 +61,7 @@ Week#: 51/52<br>
 - Then I tried multiple combinations of stopping, starting, restarting the containers and restarting the docker daemon. 
 - Figured out the docker daemon restart was causing the issue.
 - Now, I was using a pre-installed ubuntu i.e I've been using it for 2 years so naturally it had some extra services running. Decided do perform a fresh installation.
-- Did a fresh installation of Ubuntu and created two user - this took 3 hours which included downling, backing up the data and preparing the laptop as well as the installation.
+- Did a fresh installation of Ubuntu and created two user - this took 3 hours which included downloading, backing up the data and preparing the laptop as well as the installation.
 - Went up with the full setup and the issue was still there.
 - Then went to proper googling and stack overflow. Found some questions and answer that had the same case but their solutions didn't work for my system. I thought this was system specific. 
 - Tried using an external storage i.e using something in my home directory. It worked. The data was persistant meaning there was something with the directory itself.
