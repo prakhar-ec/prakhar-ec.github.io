@@ -3,13 +3,13 @@ layout: page
 title: January Week 1
 ---
 
-Dec 01 - Jan 07<br>
+Jan 01 - Jan 07<br>
 Week#: 01/52<br>
 
 ## Monday
 
 - Had the Orientation meet at 12 PM and that's it for todays day, office begins tomorrow.
-- Read a book to get myself to increase my attention span. 
+- Read a book to get myself to increase my attention span.
 
 ## Tuesday
 
@@ -20,7 +20,7 @@ Week#: 01/52<br>
 - Trying to evaluate the cause of the `TypeError: can't convert undefined to object` when trying to use the TV Set for 3D rendering.
 - I tried tracing back the issue from the back the error actually arrives from TV set being returned as undefined.
 - Ab asked to create a flowchart for the working of Furniture loading - added as much info as I could in it.
-- Made some corrections as suggested and improved readability. 
+- Made some corrections as suggested and improved readability.
 - Sat on a meet with Ab to find the issue. I need to bring in more efficiency. Was relying on console.logs more than browser debugging. Was able to trace back the issue to the json file itself.
 - Fixed the issue and the rendering works. For now the console is free from errors.
 - Started working on documentation to prepare a documentation of the tables of the database that are being used.
@@ -50,7 +50,7 @@ Week#: 01/52<br>
 
 
 ### Any problems or Blockers?
-- Deciding to add to Repo class or include in the component itself. 
+- Deciding to add to Repo class or include in the component itself.
 
 ### What's next for tomorrow?
 - Will complete the current issue as fast as I can and create the PR.
@@ -79,7 +79,7 @@ Week#: 01/52<br>
 
 ### What's next for tomorrow?
 - Decide on the action according to what is typed in the Search bar itself.
-- Make the PR for the issue. 
+- Make the PR for the issue.
 
 
 ## Friday
@@ -111,7 +111,7 @@ Week#: 01/52<br>
 
 
 ### What could've been better?
-- I think the pace for the first week was good. 
+- I think the pace for the first week was good.
 
 ### What's in for the next week?
 - Increase the Pace of work I do.

@@ -1,10 +1,10 @@
 ---
 layout: page
-title: January Week 1
+title: January Week 2
 ---
 
-Dec 01 - Jan 07<br>
-Week#: 01/52<br>
+Jan 08 - Jan 15<br>
+Week#: 02/52<br>
 
 ## Monday
 
