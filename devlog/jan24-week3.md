@@ -57,3 +57,11 @@ Week#: 03/52<br>
 
 - Started off at 8:30 AM, I want to wind up the work as much as I can before the first call of the day.
 - The idea is to get the box from canvas and work with that.
+- We got on call at 9:17AM and discussed the issue. Ab actually gave some very useful insights and a see through of what was going on in the js modules.
+- After preparing for it, I added the code and the only issue seemed to be was that the cursor was itself returning Nan, I thought it was since it wasn't mounted properly but later on I found it was a minor mistake while working with the getCursor function.
+- After making it work I added the code for the shortcuts, binded them and got them to work while rendering them.
+- We came accross another issue - combos like taps won't be supported so I had to create another wrapper so that we don't use two different packages everywhere.
+- I was done with coding and wrapping it with a few hit and try I found out how to use the other package for taps isntead of holding.
+- Then I added the shortcut combos that were in the screenshot and have pushed the PR. I'll wait to see if any changes are there meanwhile I'll try making a class for suggestions.
+- Ab said there are changes we'll discuss on meet. I've postponed the meet to tomorrow morning. I wound up writing some more shortcuts for section types until 7:45PM.
+- Sat again right now at 10:00 PM to write out the shortcuts completely - I've added the shortcut for horizontal and vertical action and currently looking at how they are being rendered again.

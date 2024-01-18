@@ -1,0 +1,827 @@
+/* eslint-disable indent */
+class Shortcuts {
+    constructor(side, level) {
+        this._side = side;
+        this._level = level;
+        this._executioner = new Executioner();
+
+        this._init();
+    }
+
+    setSide(side) {
+        this._side = side;
+        this._init();
+    }
+
+    setLevel(level) {
+        this._level = level;
+        this._init();
+    }
+
+    onUpdate() {}
+
+    _getActiveBox() {
+        let side = WOODWORK_INSTANCE.getSide(this._side);
+        let boxes = getActiveComponents(side).filter((c) => c instanceof
+Box);
+        if (boxes.length > 1) return false;
+        return boxes[0];
+    }
+
+    _getActiveSection(box) {
+        let ptr = getCursor();
+        let relPtr = { x: ptr.x - box.getLeft(), y: ptr.y - box.getBottom()
+};
+
+        return box.getSection(this._level, relPtr.x, relPtr.y);
+    }
+
+    /* Import Woodwork */
+    _bindImportWoodwork() {
+        this._executioner.register(
+            'w i',
+            (e) => {
+                e.preventDefault();
+                console.log('w i');
+
+                if (WOODWORK_UI.getLevel() != 'external') {
+                    alert('Can only import from externals.');
+                    return;
+                }
+
+                let pid = prompt('Enter project id');
+                if (!pid) return;
+
+                let wid = prompt('Enter woodwork id');
+                if (!wid) return;
+
+                if (!apiClient) return;
+
+                apiClient.getWoodwork(
+                    pid,
+                    wid,
+                    (ww) => {
+                        if (
+                            !ww ||
+                            !ww.definition ||
+                            !ww.definition.sides ||
+                            !ww.definition.externals
+                        )
+                            return;
+
+                        if (ww.definition.type !=
+WOODWORK_INSTANCE.getType()) {
+                            alert(
+                                `Can not import "${
+                                    ww.definition.type
+                                }" as "${WOODWORK_INSTANCE.getType()}".`
+                            );
+                            return;
+                        }
+
+                        let furns = {};
+                        for (const s in ww.definition.sides)
+                            furns[s] = ww.definition.sides[s].furnishings;
+
+                        try {
+                            ww = JSON.parse(ww.definition.externals);
+                            for (const s in ww.sides)
+                                ww.sides[s].furnishings = furns[s];
+                        } catch (e) {
+                            alert(`Error reading Woodwork[${wid}].`);
+                            return;
+                        }
+
+                        importWoodwork(ww);
+                    },
+                    (e) => {
+                        alert(
+                            `Error fetching Woodwork[${wid}] in
+Project[${pid}].`
+                        );
+                    }
+                );
+            },
+            this
+        );
+    }
+
+    /* Components */
+    _bindComponentAddCombos() {
+        let $menu = $('#add-component-menu').find('.simple.dropdown');
+
+        $menu.find('.item').each((i, e) => {
+            let $i = $(e);
+            let combo = $i.data('shortcut');
+            if (!combo) return;
+
+            this._executioner.register(
+                combo,
+                (e) => {
+                    e.preventDefault();
+                    console.log(combo);
+
+                    // TODO: refactor UnitUI._componentMenu.addComponent
+out...
+                    WOODWORK_UI._componentMenu.handleComponentAdd(
+                        $i.data('component')
+                    );
+                    $menu.dropdown('hide');
+                },
+                this
+            );
+        });
+
+        // this._executioner.register('c', () => $menu.dropdown('toggle'),
+this);
+    }
+
+    _bindComponentCopy() {
+        this._executioner.register(
+            'mod+c',
+            () => {
+                let side = WOODWORK_INSTANCE.getSide(this._side);
+                let comps = getActiveComponents(side);
+
+                if (comps.length === 0) return;
+
+                let target;
+
+                if (comps.length === 1) target = comps[0];
+                else {
+                    let sorted = [];
+
+                    for (const comp of comps) {
+                        if (
+                            comp.getType() === 'tiling' ||
+                            comp.getType() === 'panelling' ||
+                            comp.getType() === 'led-panelling'
+                        )
+                            sorted.unshift(comp);
+                        else sorted.push(comp);
+                    }
+
+                    target = sorted[sorted.length - 1];
+                }
+
+                let opts = JSON.parse(JSON.stringify(target));
+                let comp = Component.create(opts.type, opts);
+
+                comp._id = randomStr(6);
+                comp._side = side;
+
+                WOODWORK_UI.pickAndMove(comp, () => {
+                    opts.left = comp.getLeft();
+                    opts.bottom = comp.getBottom();
+                    opts.id = comp.getId();
+
+                    Debugger.log(Debugger.describe(side, 'side'));
+                    Debugger.log(
+                        `side.add("${opts.type}", ${JSON.stringify(opts)});`
+                    );
+
+                    undoManager.register(() => side.add(opts.type, opts));
+                });
+            },
+            this
+        );
+    }
+
+    /* update all handles to user value*/
+    _bindUpdateAllHandles() {
+        this._executioner.register(
+            'u h t',
+            (e) => {
+                e.preventDefault();
+                console.log('u h t');
+                let handleType;
+                while (handleType === undefined) {
+                    handleType = prompt(
+                        'Handle Type, Enter\n1 for Handle\n2 for Channel\n3
+for Handle less'
+                    );
+                    if (handleType === null) return;
+
+                    handleType =
+                        handleType == '1'
+                            ? 'handle'
+                            : handleType == '2'
+                            ? 'channel'
+                            : handleType == '3'
+                            ? 'handleLess'
+                            : undefined;
+                }
+
+                let compWithDoor = new Set(['box', 'bottom-box',
+'top-box']);
+                WOODWORK_INSTANCE.getSide(this._side)
+                    .getComponents()
+                    .forEach((comp) => {
+                        if (!compWithDoor.has(comp.getType())) return;
+
+                        comp.setDefaultHandleType(handleType);
+                        comp.getSections('external').forEach((sec) => {
+                            if (!sec.hasHandles()) return;
+
+                            if (handleType === 'handleLess') {
+                                sec.setDoor({
+                                    type: sec.getDoorType(),
+                                    handlePosition: null,
+                                });
+                                return;
+                            }
+                            sec.setDoor({
+                                handleType: handleType,
+                            });
+                        });
+                    });
+
+                // when level is 'internal' externals are already freezed
+i.e converted to string
+                // to modify the externals now, we need to get woodwork
+unit object from external(string)
+                // then modify object -> freeze external -> copy
+external(string) to WOODWORK_INSTANCE
+                if (WOODWORK_UI.getLevel() === 'internal') {
+                    let wi = getWoodworkFromExternal();
+                    if (wi) {
+                        wi.freezeExternal();
+                        WOODWORK_INSTANCE._external = wi._external;
+                    }
+                }
+                WOODWORK_RENDERER.render();
+                console.log(`All Handle types updated to ${handleType}`);
+            },
+            this
+        );
+    }
+
+    /* Section */
+    _bindSectionTypeCombos() {
+        const combos = {
+            cupboard: 's c',
+            'double-basket': 's d b',
+            'double-tandom': 's d t',
+            'triple-basket': 's t b',
+            'triple-tandom': 's t t',
+            'bottle-unit': 's b',
+            shelf: 's f',
+            dummy: 's u',
+            tv: ['s T', 's t v'],
+            dressing: 's n',
+            'external-drawer': 's x',
+            'internal-drawer': 's i',
+            otg: 's g',
+            open: 's o',
+            hanger: 's h',
+        };
+
+        Object.keys(combos).forEach((type) => {
+            this._executioner.register(
+                combos[type],
+                () => {
+                    console.log(combos[type]);
+                    let box = this._getActiveBox();
+                    if (!box) return;
+
+                    let ptr = getCursor();
+                    let relPtr = {
+                        x: ptr.x - box.getLeft(),
+                        y: ptr.y - box.getBottom(),
+                    };
+
+                    // set section call
+                    // TODO: check if the call can actually be made
+                    // TODO: add this call to debugger logs
+                    // TODO: check call return status
+                    let res;
+
+                    undoManager.register(() => {
+                        res = _setSectionType(
+                            box,
+                            this._level,
+                            relPtr.x,
+                            relPtr.y,
+                            type
+                        );
+                    });
+
+                    // trigger woodwork render
+                    if (res) this.onUpdate();
+                },
+                this
+            );
+        });
+    }
+
+    _bindSectionHandlePositionCombos() {
+        const combos = {
+            'top-right': 'p t r',
+            'top-left': 'p t l',
+            'top-center': 'p t c',
+
+            'center-right': 'p c r',
+            'center-left': 'p c l',
+
+            'bottom-right': 'p b r',
+            'bottom-left': 'p b l',
+            'bottom-center': 'p b c',
+
+            'top-double': 'p t d',
+            'center-double': 'p c d',
+            'bottom-double': 'p b d',
+
+            top: ['p T', 'p t t'],
+            left: 'p l',
+            right: 'p r',
+            center: ['p C', 'p c c'],
+            bottom: ['p B', 'p b b'],
+
+            none: 'p n',
+        };
+
+        Object.keys(combos).forEach((type) => {
+            this._executioner.register(
+                combos[type],
+                () => {
+                    console.log(combos[type]);
+                    let box = this._getActiveBox();
+                    if (!box) return;
+
+                    let sec = this._getActiveSection(box);
+                    if (!sec) return;
+
+                    // TODO: add debugger call
+                    // TODO: check if valid section type
+                    let res;
+
+                    undoManager.register(() => {
+                        res = _setHandlePosition(sec, type);
+                    });
+
+                    if (res) this.onUpdate();
+                },
+                this
+            );
+        });
+    }
+
+    _bindSectionHandleModelCombos() {
+        const combos = {
+            basic: 'h m s',
+            'basic-long': 'h m m',
+            'basic-longer': 'h m l',
+            knob: 'h m k',
+        };
+
+        for (const model in combos) {
+            this._executioner.register(
+                combos[model],
+                () => {
+                    console.log(combos[model]);
+                    let box = this._getActiveBox();
+                    if (!box) return;
+
+                    let sec = this._getActiveSection(box);
+                    if (!sec) return;
+
+                    undoManager.register(() => {
+                        setHandleModel(box, sec, model);
+                    });
+                    this.onUpdate();
+                },
+                this
+            );
+        }
+    }
+
+    _bindSectionDoorTypeCombos() {
+        const combos = {
+            double: 'd b',
+            single: 'd s',
+            sliding: 'd l',
+            'triple-sliding': 'd 3',
+            'four-sliding': 'd 4',
+            pooja: 'd p',
+            jally: 'd j',
+            shutter: 'd t',
+            'rolling-shutter': 'd r',
+        };
+
+        Object.keys(combos).forEach((type) => {
+            this._executioner.register(
+                combos[type],
+                () => {
+                    console.log(combos[type]);
+                    let box = this._getActiveBox();
+                    if (!box) return;
+
+                    let sec = this._getActiveSection(box);
+                    if (!sec) return;
+
+                    let res = undoManager.register(() => {
+                        setSectionDoorType(box, sec, type);
+                    });
+
+                    if (res) this.onUpdate();
+                },
+                this
+            );
+        });
+    }
+
+    _bindSectionDoorModelCombos() {
+        const combos = {
+            custom: 'd m c',
+            none: 'd m n',
+        };
+
+        for (const model in combos) {
+            this._executioner.register(
+                combos[model],
+                () => {
+                    console.log(combos[model]);
+                    let box = this._getActiveBox();
+                    if (!box) return;
+
+                    let sec = this._getActiveSection(box);
+                    if (!sec) return;
+
+                    setDoorModel(box, sec, model, this.onUpdate);
+                },
+                this
+            );
+        }
+    }
+
+    _bindSectionDoorMetaCombos() {
+        const combos = {
+            aluminium: 'g a',
+            full: 'g f',
+            padded: 'g p',
+            none: 'g n',
+        };
+
+        Object.keys(combos).forEach((opt) => {
+            this._executioner.register(
+                combos[opt],
+                () => {
+                    console.log(combos[opt]);
+                    let box = this._getActiveBox();
+                    if (!box) return;
+
+                    let sec = this._getActiveSection(box);
+                    if (!sec) return;
+
+                    let res;
+
+                    undoManager.register(() => {
+                        opt = opt == 'none' ? null : opt;
+                        res = _setSectionDoorMeta(sec, 'glass', opt);
+                    });
+
+                    if (res) this.onUpdate();
+                },
+                this
+            );
+        });
+    }
+
+    _bindSectionPatternCombos() {
+        const combos = {
+            plain: 'l p',
+            'horizontal-strip': 'l h',
+        };
+
+        Object.keys(combos).forEach((opt) => {
+            this._executioner.register(
+                combos[opt],
+                () => {
+                    console.log(combos[opt]);
+                    let box = this._getActiveBox();
+                    if (!box) return;
+
+                    let sec = this._getActiveSection(box);
+                    if (!sec) return;
+
+                    let res;
+
+                    undoManager.register(() => {
+                        res = _setSectionDoorMeta(sec, 'doorPattern', opt);
+                    });
+
+                    if (res) this.onUpdate();
+                },
+                this
+            );
+        });
+    }
+
+    _bindSectionMirrorCombos() {
+        // TODO: merge with door meta opts?
+        const combos = {
+            full: 'M f',
+            right: 'M r',
+            left: 'M l',
+            both: 'M b',
+            none: 'M n',
+        };
+
+        Object.keys(combos).forEach((opt) => {
+            this._executioner.register(
+                combos[opt],
+                () => {
+                    console.log(combos[opt]);
+                    let box = this._getActiveBox();
+                    if (!box) return;
+
+                    let sec = this._getActiveSection(box);
+                    if (!sec) return;
+
+                    let res;
+
+                    undoManager.register(() => {
+                        res = _setSectionDoorMeta(
+                            sec,
+                            'mirror',
+                            opt == 'none' ? null : opt
+                        );
+                    });
+
+                    if (res) this.onUpdate();
+                },
+                this
+            );
+        });
+    }
+
+    /* Partitions */
+    _bindPartitionCombos() {
+        ['h t', 'h b', 'v l', 'v r'].forEach((combo) => {
+            this._executioner.register(
+                combo,
+                () => {
+                    let box = this._getActiveBox();
+                    if (!box) return;
+
+                    let sec = this._getActiveSection(box);
+                    if (!sec) return;
+
+                    let [o, d] = combo.split(' ');
+                    let end = { t: 'top', l: 'left', r: 'right', b:
+'bottom' }[
+                        d
+                    ];
+                    let orientation = o == 'v' ? 'vertical' : 'horizontal';
+
+                    DimensionInput(
+                        [{ name: `Distance from ${end}` }],
+                        ([pos]) => {
+                            if (!pos) return;
+
+                            let slot = {};
+                            if (end == 'left') {
+                                slot.x = sec.getLeft() + pos -
+PLY_THICKNESS;
+                                slot.y = (sec.getTop() + sec.getBottom()) /
+2;
+                            } else if (end == 'bottom') {
+                                slot.y = sec.getBottom() + pos -
+PLY_THICKNESS;
+                                slot.x = (sec.getLeft() + sec.getRight()) /
+2;
+                            } else if (end == 'right') {
+                                slot.x = sec.getRight() - pos;
+                                slot.y = (sec.getTop() + sec.getBottom()) /
+2;
+                            } else if (end == 'top') {
+                                slot.x = (sec.getLeft() + sec.getRight()) /
+2;
+                                slot.y = sec.getTop() - pos;
+                            }
+
+                            if (
+                                box.checkPartitionSlot(
+                                    this._level,
+                                    orientation,
+                                    slot.x,
+                                    slot.y
+                                )
+                            ) {
+                                undoManager.register(() => {
+                                    box.addPartition(
+                                        this._level,
+                                        orientation,
+                                        slot.x,
+                                        slot.y
+                                    );
+                                });
+                                this.onUpdate();
+                            }
+                        }
+                    );
+                },
+                this
+            );
+        });
+    }
+
+    _bindMultiPartitionCombos() {
+        ['2', '3', '4', '5', '6'].forEach((count) => {
+            ['h', 'v'].forEach((o) => {
+                this._executioner.register(
+                    `${o} ${count}`,
+                    () => {
+                        let box = this._getActiveBox();
+                        if (!box) return;
+
+                        let sec = this._getActiveSection(box);
+                        if (!sec) return;
+
+                        let slots = [];
+                        let totalWidth = sec.getRight() - sec.getLeft();
+                        let partWidth =
+                            (totalWidth - (count - 1) * PLY_THICKNESS) /
+count;
+                        let totalHeight = sec.getTop() - sec.getBottom();
+                        let partHeight =
+                            (totalHeight - (count - 1) * PLY_THICKNESS) /
+count;
+                        for (var i = 1; i < count; i++) {
+                            slots.push({
+                                x:
+                                    sec.getLeft() +
+                                    partWidth * i +
+                                    PLY_THICKNESS * (i - 1),
+                                y:
+                                    sec.getBottom() +
+                                    partHeight * i +
+                                    PLY_THICKNESS * (i - 1),
+                            });
+                        }
+
+                        let orientation = o == 'h' ? 'horizontal' :
+'vertical';
+                        let partitionable = true;
+                        slots.forEach((s) => {
+                            partitionable &= box.checkPartitionSlot(
+                                this._level,
+                                orientation,
+                                s.x,
+                                s.y
+                            );
+                        });
+                        if (!partitionable) return;
+
+                        // TODO: add undo call
+                        // TODO: add debug logs
+                        undoManager.register(() => {
+                            slots.forEach((s) =>
+                                box.addPartition(
+                                    this._level,
+                                    orientation,
+                                    s.x,
+                                    s.y
+                                )
+                            );
+                        });
+
+                        this.onUpdate();
+                    },
+                    this
+                );
+            });
+        });
+        this._executioner.register(
+            ['H', 'h h'],
+            () => {
+                WOODWORK_UI.setAction('horizontal');
+                WOODWORK_RENDERER.render();
+            },
+            this
+        );
+        this._executioner.register(
+            ['V', 'v v'],
+            () => {
+                WOODWORK_UI.setAction('vertical');
+                WOODWORK_RENDERER.render();
+            },
+            this
+        );
+    }
+
+    _bindZoomToggle() {
+        this._executioner.register(
+            'z z',
+            () => {
+                canvas.panDisabled = !canvas.panDisabled;
+                canvas.zoomDisabled = !canvas.zoomDisabled;
+
+                WOODWORK_RENDERER.render();
+            },
+            this
+        );
+    }
+
+    /* Components */
+    _bindPickAndMove() {
+        this._executioner.register(
+            'm',
+            () => WOODWORK_UI.setAction('move'),
+            this
+        );
+    }
+
+    _bindRedoLastCombo() {
+        KeySequencer.bind('.', (e) => {
+            if ($(e.target).is('input,textarea')) return;
+
+            this._executioner.redoLastCombo(e);
+        });
+    }
+
+    _bind() {
+        this._bindImportWoodwork();
+        this._bindComponentAddCombos();
+        this._bindComponentCopy();
+        this._bindPickAndMove();
+        this._bindZoomToggle();
+
+        this._bindSectionTypeCombos();
+        this._bindSectionDoorTypeCombos();
+        this._bindSectionDoorModelCombos();
+        this._bindSectionDoorMetaCombos();
+        this._bindSectionHandleModelCombos();
+        this._bindSectionHandlePositionCombos();
+        this._bindSectionPatternCombos();
+        this._bindSectionMirrorCombos();
+
+        this._bindPartitionCombos();
+        this._bindMultiPartitionCombos();
+
+        this._bindRedoLastCombo();
+        this._bindUpdateAllHandles();
+    }
+
+    _init() {
+        KeySequencer.reset();
+        this._executioner.reset();
+        this._bind();
+    }
+}
+
+class KeySequencer {
+    static bind(sequence, handler) {
+        Mousetrap.bind(sequence, handler);
+    }
+    static unbind(sequence, handler) {
+        Mousetrap.unbind(sequence, handler);
+    }
+    static reset() {
+        Mousetrap.reset();
+    }
+}
+
+class Executioner {
+    constructor() {
+        this._handlers = new Map();
+    }
+
+    register(combo, handler, context) {
+        let handlers;
+
+        if (this._handlers.has(combo.toString())) {
+            handlers = this._handlers.get(combo.toString());
+            this._handlers.set(combo.toString(), [
+                ...handlers,
+                [handler, context],
+            ]);
+        } else {
+            this._handlers.set(combo.toString(), [[handler, context]]);
+            KeySequencer.bind(combo, (e) => this._handle(combo, e));
+        }
+    }
+
+    _handle(combo, e) {
+        this._lastExecution = combo;
+        this._handlers
+            .get(combo.toString())
+            .forEach(([handler, context]) => handler.call(context, e));
+    }
+
+    unregister(combo, handler) {
+        this._handlers.set(
+            combo,
+            this._handlers.get(combo).filter((h) => h !== handler)
+        );
+    }
+
+    reset() {
+        this._handlers = new Map();
+    }
+
+    redoLastCombo(e) {
+        if (!this._lastExecution) return;
+        this._handle(this._lastExecution, e);
+    }
+}
