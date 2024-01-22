@@ -65,3 +65,12 @@ Week#: 03/52<br>
 - Then I added the shortcut combos that were in the screenshot and have pushed the PR. I'll wait to see if any changes are there meanwhile I'll try making a class for suggestions.
 - Ab said there are changes we'll discuss on meet. I've postponed the meet to tomorrow morning. I wound up writing some more shortcuts for section types until 7:45PM.
 - Sat again right now at 10:00 PM to write out the shortcuts completely - I've added the shortcut for horizontal and vertical action and currently looking at how they are being rendered again.
+- I also did a bit of exploring in the cold shortcuts code to figure out what shortcuts were being used, it's a good list for reference.
+
+
+## Friday
+
+- Starting off at 8:30 AM right now, I'll take an overview of the tasks that have to be done and get a meet with Ab.
+- Worked on adding more and more shortcuts for the Woodworks Modular. I added Multi-partition shortcuts as well as refactored a bit of code.
+- Got on call with Ab and discussed out some PR changes and refactoring of Shortcuts to Woodwork itself, that way we won't be having a library class using a js object.
+- Made the respective changes and tried to keep the code as clean as possible. I wrapped up around 6:30PM after commitig and pushing the code.
