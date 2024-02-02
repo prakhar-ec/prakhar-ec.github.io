@@ -48,6 +48,10 @@ Signed off at 7:30.
 
 Starting off at 8:30AM:
 
--8:30AM Ab commented on my PR #82 so I took a look at them and started working on them.
--10:00AM Worked on issue #69 and worked off the PR to include the final working details.
--4:00PM finalised the PR, I'll make any changes if requested by Ab.
+- 8:30AM Ab commented on my PR #82 so I took a look at them and started working on them.
+- 10:00AM Worked on issue #69 and worked off the PR to include the final working details.
+- 4:00PM finalised the PR, I'll make any changes if requested by Ab.
+
+
+
+
