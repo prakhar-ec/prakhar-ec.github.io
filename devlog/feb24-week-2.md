@@ -30,4 +30,4 @@ Started work at 08:30AM
 - 04:30PM - Got on meet with Ab to discuss further of issue #72 - adding the Drawing Page. I have a path now.
 - 05:40PM - Meet eneded, got some light as to what I have to do.
 - 07:00PM - I've fetched the prices for the woodworks, I'll start creating the table and the backend routes now.
-- 10:30PM - 12:00PM - Tried making changes to the database.
+- 10:30PM - 12:00AM - Tried making changes to the database.
