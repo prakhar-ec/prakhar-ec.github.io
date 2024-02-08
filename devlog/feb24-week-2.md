@@ -31,3 +31,30 @@ Started work at 08:30AM
 - 05:40PM - Meet eneded, got some light as to what I have to do.
 - 07:00PM - I've fetched the prices for the woodworks, I'll start creating the table and the backend routes now.
 - 10:30PM - 12:00AM - Tried making changes to the database.
+
+## Wednesday
+
+Starting work at 08:30AM
+
+- 08:30AM - Ab commented some more context on the PR. We have a flow in mind, Goal is to get as much done today as possible.
+- 09:15AM - Made the DB migration aka Table ( issue #72)
+- 12:00AM - Made the basic Model, and functions to manage the table. Got on call with Ab to discuss further flow.
+- 01:00AM - Started working on the flow.
+- 03:00AM - Storing Ids from the modal in the database
+- 05:00AM - The definitions are being stored in db, for the woodworks.
+- 06:00AM - Prepared a layout of the `js/Drawings.js` to manage the state.
+- 07:00AM - Pages are fetching the Drawings. Adding `getFigures` for each state of the woodworks module.
+
+
+## Thursday
+
+Started work at 8:45AM.
+
+- 08:45AM - I was not able to understand the flow for getFigures. So starting with that.
+- 11:00AM - Made some more changes to the DB, modified the table.
+- 12:30PM - Added the getFigures() in the heirarchy tree.
+- 02:00PM - Ab suggested a change in flow. I'm having trouble trying to wrap my mind on how to make the 2D renders. I am trying to mimic the render process but that isn't the right way.
+- 05:30PM - I've extracted out the information from 'js/woodworks.js'.
+- 06:30PM - Tried drawing on the canvas but faced an error.
+
+Still working on issue #72
