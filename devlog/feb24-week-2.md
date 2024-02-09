@@ -58,3 +58,15 @@ Started work at 8:45AM.
 - 06:30PM - Tried drawing on the canvas but faced an error.
 
 Still working on issue #72
+
+## Friday
+
+Started work at 09:00AM
+
+- 09:00AM - Got on call with Ab to get a basic rectangle on the screen.
+- 12:00PM - I was able to generate a basic Figure from the data given.
+- 01:30PM - Each woodwork was working, just the partititons were double lined.
+- 03:30PM - Tried tweaking the partititons but no use.
+- 04:30PM - The Figures show  up with labels and dimension lines.
+- 05:00PM - I'll try to clean up some of the code.
+- 06:30PM - Logging off. I tried some code cleanup as well as realised a bug in the dimensions. had to debug a lot but I think it works now.
