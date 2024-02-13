@@ -1,6 +1,6 @@
 ---
 layout: page
-title: February Week 2
+title: February Week 3
 ---
 
 Feb 12 - Feb 16<br>
@@ -18,3 +18,9 @@ Starting at 08:15AM
 - 04:00PM - Worked and added exports column in the Projects table.
 - 06:00PM - Had a short review and further discussion with Ab about the Feature. Got some changes to make the PR and define another function to work.
 - 07:00PM - Made some changes in the backend. Currently refactoring getFigures -> getElements
+
+
+## Tuesday
+
+Starting Work at 08:00AM
+
