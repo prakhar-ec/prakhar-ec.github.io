@@ -1,0 +1,121 @@
+
+<script>
+import { ListGroup, ListGroupItem } from "sveltestrap";
+import {woodworkMap, scene} from "../../js/Walkin";
+import ModularDesignModal from "../modular/DesignModal.svelte";
+import jQ from "jquery";
+
+let woodworks, labels;
+let openModular = false;
+let woodwork;       // to be edited in modular design modal
+
+$: if ($woodworkMap) {
+  labels = {};
+  let comps = scene.layout.definition.components.filter(c => c.type === 'woodwork');
+
+  for (const c of comps) {
+    if (!(c.label in labels))
+        labels[c.label] = c;
+  }
+
+  woodworks = Object.keys(labels).sort().map(l => labels[l]);
+}
+
+function titleCase(str) {
+  return str.replace(/\b\S/g, (t) => t.toUpperCase());
+}
+
+function editWoodwork(w) {
+  woodwork = w;
+  openModular = true;
+}
+
+function magnifyImage(e) {
+  let mWidth, mHeight, cx, cy;
+
+  mWidth = jQ('#zoomed').width();
+  mHeight = jQ('#zoomed').height();
+
+  // Factor to enlarge the background size and position
+  cx = e.currentTarget.offsetWidth / mWidth;
+  cy = e.currentTarget.offsetHeight / mHeight;
+
+  jQ('#zoomed').css({
+    display: 'block',
+    left: (e.offsetX ) + 'px', // Add an offset to prevent overlap with the pointer
+    top: (e.offsetY + 20) + 'px',
+    backgroundSize: `${e.currentTarget.offsetWidth * cx}px ${e.currentTarget.offsetHeight * cy}px`,
+    backgroundPosition: `-${(e.offsetX * cx)  - mWidth / 2}px -${(e.offsetY * cy) - mHeight / 2}px`
+  });
+}
+
+function removeMagnifier(e) {
+  jQ('#zoomed').css({
+      display: 'none',
+    });
+}
+
+</script>
+
+
+
+{#if $woodworkMap }
+
+<div id="moveWithMouse">
+  <div id="zoomed" style='background-image: url({$woodworkMap})'></div>
+  <img class="woodworkmap" src={$woodworkMap} alt="Layout Woodwork Map"  on:mousemove={magnifyImage} on:mouseleave={removeMagnifier}/>
+</div>
+
+{#if woodworks.length == 0 }
+<div class="container grey text-center">
+No woodworks.<br> Add in 2D.
+</div>
+{/if}
+
+
+<ListGroup flush>
+    {#each woodworks as w}
+    <ListGroupItem tag="button" on:click={() => editWoodwork(w)}>
+        <div class="container-fluid">
+        <div class="row">
+            <div class="col-2 woodwork-label"><b>{w.label}</b></div>
+            <div class="col-6 woodwork-type">{ titleCase(w.subType)}</div>
+            <div class="col-4 woodwork-type"><a href={'#'}>Edit</a></div>
+        </div>
+        </div>
+    </ListGroupItem>
+    {/each}
+</ListGroup>
+
+{/if}
+
+{#if openModular }
+<ModularDesignModal bind:open={openModular} woodwork={woodwork}></ModularDesignModal>
+{/if}
+
+
+<style>
+
+.woodworkmap {
+  width: 100%;
+  margin: 20px 0;
+}
+
+#moveWithMouse {
+  position: relative;
+}
+
+#zoomed {
+  position: absolute;
+  border: 1px solid rgba(128, 128, 128, 0.432);
+  pointer-events: none;
+  background-position: 50% 50%;
+  width: 80px;
+  height: 80px;
+  display: none;
+  border-radius: 50%;
+  z-index:3;
+  background-color: white;
+}
+
+</style>
