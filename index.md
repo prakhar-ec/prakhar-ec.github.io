@@ -1,6 +1,7 @@
 ---
 layout: home
 ---
+February 2024 - [Week 5](./devlog/feb24-week-5.md)
 
 February 2024 - [Week 4](./devlog/feb24-week-4.md)
 
